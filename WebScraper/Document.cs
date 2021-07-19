@@ -58,26 +58,27 @@ namespace WebScraper
             FileInfo fileInfo = new FileInfo(filePath);
             if (fileInfo.Exists) fileInfo.Delete();
 
-            try
+
+            using (StreamWriter streamWriter = new StreamWriter(filePath, false, System.Text.Encoding.Default))
             {
-                using (StreamWriter streamWriter = new StreamWriter(filePath, false, System.Text.Encoding.Default))
+                if (this._items != null && this._items.Length > 0)
                 {
-                    if (this._items != null && this._items.Length > 0)
+                    try
                     {
                         for (int i = 0; i < this._items.Length; i++)
                             streamWriter.WriteLine(this._items[i]);
-                        
-                        this._log.Information("The result is written to a file " + filePath);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        this._log.Error("The array parsing is empty");
+                        this._log.Error(ex, ex.Message);
                     }
+
+                    this._log.Information("The result is written to a file " + filePath);
                 }
-            }
-            catch (Exception ex)
-            {
-                this._log.Error(ex, ex.Message);
+                else
+                {
+                    this._log.Error("The array parsing is empty");
+                }
             }
         }
     }
