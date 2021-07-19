@@ -2,13 +2,14 @@
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using HtmlAgilityPack;
+using System.IO;
 
 namespace WebScraper
 {
     public class Document
     {
         private readonly string _url;
-        private ILogger _log;
+        private readonly ILogger _log;
         private string[] _items;
 
         public Document(IConfigurationRoot settings, ILogger log)
@@ -31,13 +32,53 @@ namespace WebScraper
             var nodes = htmlDoc.DocumentNode
                 .SelectNodes("//div[@class='article__text']/div/h2/a");
 
-            this._items = new string[nodes.Count];
+            int count = nodes.Count;
+            if (count > 0)
+            {
+                this._items = new string[count];
 
-            for (int i = 0; i < nodes.Count; i++)
-                this._items[i] = nodes[i].InnerText;
-            
-            
-            Console.WriteLine(String.Join(", ", this._items));
+                for (int i = 0; i < count; i++)
+                    this._items[i] = nodes[i].InnerText;
+
+                Console.WriteLine(String.Join(", ", this._items));
+            }
+            else
+            {
+                throw new Exception("The parsing result is empty");
+            }
+        }
+
+        public void WriteFile()
+        {
+            string dirPath = Directory.GetCurrentDirectory() + "\\out";
+            DirectoryInfo dirInfo = new DirectoryInfo(dirPath);
+            if (!dirInfo.Exists) dirInfo.Create();
+
+            string filePath = dirPath + "\\out.txt";
+            FileInfo fileInfo = new FileInfo(filePath);
+            if (fileInfo.Exists) fileInfo.Delete();
+
+            try
+            {
+                using (StreamWriter streamWriter = new StreamWriter(filePath, false, System.Text.Encoding.Default))
+                {
+                    if (this._items != null && this._items.Length > 0)
+                    {
+                        for (int i = 0; i < this._items.Length; i++)
+                            streamWriter.WriteLine(this._items[i]);
+                        
+                        this._log.Information("The result is written to a file " + filePath);
+                    }
+                    else
+                    {
+                        this._log.Error("The array parsing is empty");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                this._log.Error(ex, ex.Message);
+            }
         }
     }
 }

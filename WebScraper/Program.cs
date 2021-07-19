@@ -20,7 +20,8 @@ namespace WebScraper
             try
             {
                 Document doc = new Document(settings.Configuration, Log.Logger);
-                doc.Parser();
+                // doc.Parser();
+                doc.WriteFile();
             }
             catch (Exception ex)
             {
