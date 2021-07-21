@@ -40,7 +40,7 @@ namespace WebScraper
                 for (int i = 0; i < count; i++)
                     this._items[i] = nodes[i].InnerText;
 
-                Console.WriteLine(String.Join(", ", this._items));
+                Console.WriteLine("Result: {0}", String.Join(", ", this._items));
             }
             else
             {
